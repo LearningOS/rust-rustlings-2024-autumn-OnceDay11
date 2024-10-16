@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,20 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        self.items.push(value);
+
+        let mut idx = self.count;
+        let mut pi = self.parent_idx(idx);
+        while pi > 0 {
+            if (self.comparator)(&self.items[idx], &self.items[pi]) {
+                self.items.swap(pi, idx);
+                idx = pi;
+                pi = self.parent_idx(idx);
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -56,9 +68,23 @@ where
         self.left_child_idx(idx) + 1
     }
 
-    fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+    fn sink(&mut self, idx: usize) {
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+        let mut temp = idx;
+
+        if left <= self.len() && (self.comparator)(&self.items[left], &self.items[temp]) {
+            temp = left;
+        }
+        if right <= self.len() && (self.comparator)(&self.items[right], &self.items[temp])
+        {
+            temp = right;
+        }
+
+        if temp != idx {
+            self.items.swap(idx, temp);
+            self.sink(temp)
+        }
     }
 }
 
@@ -84,8 +110,18 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        if self.len() == 1 {
+            self.count -= 1;
+            return self.items.pop();
+        }
+        self.items.swap(1, self.count);
+        let value = self.items.pop().unwrap();
+        self.count -= 1;
+        self.sink(1);
+        return Some(value);
     }
 }
 
@@ -129,6 +165,7 @@ mod tests {
         heap.add(2);
         heap.add(9);
         heap.add(11);
+        println!("xxx=> {} | {} {} {} {}", heap.count, heap.items[1], heap.items[2], heap.items[3], heap.items[4]);
         assert_eq!(heap.len(), 4);
         assert_eq!(heap.next(), Some(2));
         assert_eq!(heap.next(), Some(4));
